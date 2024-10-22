@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Button, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Button, TextInput, Alert, TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome'; // Importamos el ícono de FontAwesome
 
 const menuItems = [
   { nombre: 'Limonada', tipo: 'Bebidas Frías', descripcion: 'Limonada fresca con hielo', precio: 5000 },
@@ -21,16 +22,15 @@ const menuItems = [
   { nombre: 'Menú Infantil', tipo: 'Menú Infantil', descripcion: 'Nuggets de pollo con papas fritas', precio: 12000 },
 ];
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }) {
   const [carrito, setCarrito] = useState([]);
   const [cantidades, setCantidades] = useState({});
+  const [mostrarCarrito, setMostrarCarrito] = useState(false);
 
-  // Función para manejar la cantidad
   const handleCantidadChange = (nombre, cantidad) => {
     setCantidades((prev) => ({ ...prev, [nombre]: parseInt(cantidad) || 0 }));
   };
 
-  // Función para añadir un plato al carrito
   const agregarAlCarrito = (plato) => {
     const cantidad = cantidades[plato.nombre] || 1;
     if (cantidad > 0) {
@@ -41,52 +41,61 @@ export default function HomeScreen() {
     }
   };
 
-  // Calcular el total de la orden
   const calcularTotal = () => {
     return carrito.reduce((total, item) => total + item.precio * item.cantidad, 0);
   };
 
+  const irAlCarrito = () => {
+    setMostrarCarrito(!mostrarCarrito);
+  };
+
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerText}>Bienvenido a su restaurante a domicilio</Text>
+        <TouchableOpacity onPress={irAlCarrito} style={styles.cartIcon}>
+          <Icon name="shopping-cart" size={30} color="#fff" />
+        </TouchableOpacity>
       </View>
 
-      {/* Menu */}
-      <ScrollView style={styles.menuContainer}>
-        {menuItems.map((plato, index) => (
-          <View key={index} style={styles.menuItem}>
-            <Text style={styles.menuItemTitle}>{plato.nombre}</Text>
-            <Text style={styles.menuItemType}>{plato.tipo}</Text>
-            <Text style={styles.menuItemDescription}>{plato.descripcion}</Text>
-            <Text style={styles.menuItemPrice}>Precio: ${plato.precio.toLocaleString()} COP</Text>
+      {mostrarCarrito ? (
+        <View style={styles.carritoContainer}>
+          <Text style={styles.carritoTitle}>Carrito de compras</Text>
+          <ScrollView>
+            {carrito.length > 0 ? (
+              carrito.map((item, index) => (
+                <Text key={index} style={styles.carritoItem}>
+                  {item.nombre} x{item.cantidad} - ${item.precio * item.cantidad}
+                </Text>
+              ))
+            ) : (
+              <Text style={styles.emptyCartText}>Tu carrito está vacío.</Text>
+            )}
+            <Text style={styles.totalText}>Total: ${calcularTotal().toLocaleString()} COP</Text>
+          </ScrollView>
+        </View>
+      ) : (
+        <ScrollView style={styles.menuContainer}>
+          {menuItems.map((plato, index) => (
+            <View key={index} style={styles.menuItem}>
+              <Text style={styles.menuItemTitle}>{plato.nombre}</Text>
+              <Text style={styles.menuItemType}>{plato.tipo}</Text>
+              <Text style={styles.menuItemDescription}>{plato.descripcion}</Text>
+              <Text style={styles.menuItemPrice}>Precio: ${plato.precio.toLocaleString()} COP</Text>
 
-            {/* Selector de cantidad */}
-            <TextInput
-              style={styles.input}
-              placeholder="Cantidad"
-              keyboardType="numeric"
-              onChangeText={(value) => handleCantidadChange(plato.nombre, value)}
-              value={cantidades[plato.nombre]?.toString() || '1'}
-            />
+              <TextInput
+                style={styles.input}
+                placeholder="Cantidad"
+                keyboardType="numeric"
+                onChangeText={(value) => handleCantidadChange(plato.nombre, value)}
+                value={cantidades[plato.nombre]?.toString() || '1'}
+              />
 
-            {/* Botón para añadir al carrito */}
-            <Button title="Añadir al carrito" onPress={() => agregarAlCarrito(plato)} />
-          </View>
-        ))}
-      </ScrollView>
-
-      {/* Carrito */}
-      <View style={styles.carritoContainer}>
-        <Text style={styles.carritoTitle}>Carrito de compras</Text>
-        {carrito.map((item, index) => (
-          <Text key={index} style={styles.carritoItem}>
-            {item.nombre} x{item.cantidad} - ${item.precio * item.cantidad}
-          </Text>
-        ))}
-        <Text style={styles.totalText}>Total: ${calcularTotal().toLocaleString()} COP</Text>
-      </View>
+              <Button title="Añadir al carrito" onPress={() => agregarAlCarrito(plato)} />
+            </View>
+          ))}
+        </ScrollView>
+      )}
     </View>
   );
 }
@@ -106,6 +115,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
+  },
+  cartIcon: {
+    position: 'absolute',
+    right: 20,
+    top: 50,
   },
   menuContainer: {
     padding: 20,
@@ -159,5 +173,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 10,
+  },
+  emptyCartText: {
+    fontSize: 16,
+    color: '#999',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
