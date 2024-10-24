@@ -41,13 +41,41 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
+  const modificarCantidad = (index, nuevaCantidad) => {
+    setCarrito((prev) => {
+      const nuevoCarrito = [...prev];
+      nuevoCarrito[index].cantidad = parseInt(nuevaCantidad) || 0;
+      return nuevoCarrito;
+    });
+  };
+
+  const eliminarDelCarrito = (index) => {
+    setCarrito((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const calcularTotal = () => {
     return carrito.reduce((total, item) => total + item.precio * item.cantidad, 0);
+  };
+
+  const calcularDomicilio = () => {
+    const totalCompra = calcularTotal();
+    if (totalCompra > 90000) {
+      return 0;
+    } else if (totalCompra > 70000) {
+      return 3000;
+    } else {
+      return 5000;
+    }
+  };
+
+  const calcularTotalConDomicilio = () => {
+    return calcularTotal() + calcularDomicilio();
   };
 
   const irAlCarrito = () => {
     setMostrarCarrito(!mostrarCarrito);
   };
+  
 
   return (
     <View style={styles.container}>
@@ -57,21 +85,37 @@ export default function HomeScreen({ navigation }) {
           <Icon name="shopping-cart" size={30} color="#fff" />
         </TouchableOpacity>
       </View>
-
+  
       {mostrarCarrito ? (
         <View style={styles.carritoContainer}>
           <Text style={styles.carritoTitle}>Carrito de compras</Text>
           <ScrollView>
             {carrito.length > 0 ? (
               carrito.map((item, index) => (
-                <Text key={index} style={styles.carritoItem}>
-                  {item.nombre} x{item.cantidad} - ${item.precio * item.cantidad}
-                </Text>
+                <View style={styles.carritoItem} key={index}>
+                  <Text>{item.nombre}</Text>
+                  <TextInput
+                    style={styles.input}
+                    keyboardType="numeric"
+                    value={item.cantidad.toString()}
+                    onChangeText={(cantidad) => modificarCantidad(index, cantidad)}
+                  />
+                  <Text> x ${item.precio.toLocaleString()} = ${item.precio * item.cantidad}</Text>
+                  <TouchableOpacity
+                    onPress={() => eliminarDelCarrito(index)}
+                    style={styles.eliminarButton}
+                  >
+                    <Text style={styles.eliminarButtonText}>Eliminar</Text>
+                  </TouchableOpacity>
+                </View>
               ))
             ) : (
               <Text style={styles.emptyCartText}>Tu carrito está vacío.</Text>
             )}
-            <Text style={styles.totalText}>Total: ${calcularTotal().toLocaleString()} COP</Text>
+  
+            <Text style={styles.totalText}>Subtotal: ${calcularTotal().toLocaleString()} COP</Text>
+            <Text style={styles.totalText}>Valor del domicilio: ${calcularDomicilio().toLocaleString()} COP</Text>
+            <Text style={styles.totalText}>Total a pagar: ${calcularTotalConDomicilio().toLocaleString()} COP</Text>
           </ScrollView>
         </View>
       ) : (
@@ -82,7 +126,7 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.menuItemType}>{plato.tipo}</Text>
               <Text style={styles.menuItemDescription}>{plato.descripcion}</Text>
               <Text style={styles.menuItemPrice}>Precio: ${plato.precio.toLocaleString()} COP</Text>
-
+  
               <TextInput
                 style={styles.input}
                 placeholder="Cantidad"
@@ -90,7 +134,7 @@ export default function HomeScreen({ navigation }) {
                 onChangeText={(value) => handleCantidadChange(plato.nombre, value)}
                 value={cantidades[plato.nombre]?.toString() || '1'}
               />
-
+  
               <Button title="Añadir al carrito" onPress={() => agregarAlCarrito(plato)} />
             </View>
           ))}
@@ -168,6 +212,11 @@ const styles = StyleSheet.create({
   carritoItem: {
     fontSize: 16,
     marginVertical: 5,
+    flexDirection: 'row', // Para alinear los elementos en línea horizontal
+    alignItems: 'center', // Centrar verticalmente
+    paddingVertical: 10, // Espacio vertical entre los ítems
+    borderBottomWidth: 1, // Línea divisoria
+    borderColor: '#ccc',
   },
   totalText: {
     fontSize: 18,
@@ -179,5 +228,16 @@ const styles = StyleSheet.create({
     color: '#999',
     textAlign: 'center',
     marginTop: 20,
+  },
+  eliminarButton: {
+    backgroundColor: 'red',
+    padding: 3, // Reducir el tamaño del padding
+    borderRadius: 5,
+    marginLeft: 10,
+  },
+  eliminarButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 12, // Tamaño de texto más pequeño
   },
 });
