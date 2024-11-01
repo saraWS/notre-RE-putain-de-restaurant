@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Button, TextInput, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Button, TextInput, Alert, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'; // Importamos el ícono de FontAwesome
+const imgT = require('../../assets/images/limonada.png')
 
 const menuItems = [
   { nombre: 'Limonada', tipo: 'Bebidas Frías', descripcion: 'Limonada fresca con hielo', precio: 5000 },
@@ -81,6 +82,10 @@ export default function HomeScreen({ navigation }) {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Bienvenido a su restaurante a domicilio</Text>
+        <Image source={imgT} style={{
+    width: 50,
+    height: 50,
+  }} />
         <TouchableOpacity onPress={irAlCarrito} style={styles.cartIcon}>
           <Icon name="shopping-cart" size={30} color="#fff" />
         </TouchableOpacity>
@@ -149,50 +154,60 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+
   header: {
     paddingTop: 50,
     paddingBottom: 20,
     backgroundColor: '#ff6347',
     alignItems: 'center',
   },
+
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
   },
+
   cartIcon: {
     position: 'absolute',
     right: 20,
     top: 50,
   },
+
   menuContainer: {
     padding: 20,
   },
+
   menuItem: {
     marginBottom: 20,
     padding: 15,
     backgroundColor: '#f8f8f8',
     borderRadius: 10,
   },
+
   menuItemTitle: {
     fontSize: 18,
     fontWeight: 'bold',
   },
+
   menuItemType: {
     fontSize: 14,
     color: '#666',
     marginVertical: 5,
   },
+
   menuItemDescription: {
     fontSize: 14,
     color: '#333',
   },
+
   menuItemPrice: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#2e8b57',
     marginTop: 5,
   },
+
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
@@ -200,15 +215,18 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     width: 80,
   },
+
   carritoContainer: {
     padding: 20,
     borderTopWidth: 1,
     borderColor: '#ccc',
   },
+
   carritoTitle: {
     fontSize: 20,
     fontWeight: 'bold',
   },
+
   carritoItem: {
     fontSize: 16,
     marginVertical: 5,
