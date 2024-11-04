@@ -28,6 +28,7 @@ export default function HomeScreen({ navigation }) {
   const [cantidades, setCantidades] = useState({});
   const [mostrarCarrito, setMostrarCarrito] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("Todos"); // Estado para el filtro
+  const [historialPedidos, setHistorialPedidos] = useState([]); // Estado para el historial de pedidos
 
   const handleCantidadChange = (nombre, cantidad) => {
     setCantidades((prev) => ({ ...prev, [nombre]: parseInt(cantidad) || 0 }));
@@ -74,6 +75,22 @@ export default function HomeScreen({ navigation }) {
     return calcularTotal() + calcularDomicilio();
   };
 
+  const confirmarPedido = () => {
+    if (carrito.length === 0) {
+      Alert.alert('Error', 'El carrito está vacío.');
+      return;
+    }
+    // Añadir el pedido al historial
+    const nuevoPedido = {
+      items: [...carrito],
+      total: calcularTotalConDomicilio(),
+      fecha: new Date().toLocaleString()
+    };
+    setHistorialPedidos((prev) => [...prev, nuevoPedido]);
+    setCarrito([]); // Vaciar el carrito
+    Alert.alert('Pedido confirmado', 'Tu pedido ha sido confirmado.');
+  };
+
   const irAlCarrito = () => {
     setMostrarCarrito(!mostrarCarrito);
   };
@@ -104,7 +121,7 @@ export default function HomeScreen({ navigation }) {
             {carrito.length > 0 ? (
               carrito.map((item, index) => (
                 <View key={index} style={styles.carritoItem}>
-                  <Text>{item.nombre} x{item.cantidad} - ${item.precio * item.cantidad}</Text>
+                  <Text>{item.nombre} x {item.cantidad} -> ${item.precio * item.cantidad}</Text>
                   <TextInput
                     style={styles.input}
                     keyboardType="numeric"
@@ -122,6 +139,22 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.totalText}>Total: ${calcularTotal().toLocaleString()} COP</Text>
             <Text style={styles.totalText}>Domicilio: ${calcularDomicilio().toLocaleString()} COP</Text>
             <Text style={styles.totalText}>Total con domicilio: ${calcularTotalConDomicilio().toLocaleString()} COP</Text>
+          <Button title="CONFIRMAR PEDIDO" onPress={confirmarPedido} /> {/* Botón de confirmar pedido */}
+
+          {/* Historial de pedidos */}
+          <Text style={styles.historialTitle}>Historial de Pedidos</Text>
+          <ScrollView>
+            {historialPedidos.map((pedido, index) => (
+              <View key={index} style={styles.historialPedido}>
+                <Text>Pedido realizado el: {pedido.fecha}</Text>
+                <Text>Total: ${pedido.total.toLocaleString()} COP</Text>
+                {pedido.items.map((item, idx) => (
+                  <Text key={idx}>{item.nombre} x {item.cantidad}</Text>
+                ))}
+              </View>
+            ))}
+          </ScrollView>
+          
           </View>
         ) : (
           <>
