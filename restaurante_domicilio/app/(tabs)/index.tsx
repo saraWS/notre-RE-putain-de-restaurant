@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Button, TextInput, Alert, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'; // Importamos el ícono de FontAwesome
+import { Picker } from '@react-native-picker/picker';
 
 const menuItems = [
   { nombre: 'Limonada', tipo: 'Bebidas Frías', descripcion: 'Limonada fresca con hielo', precio: 5000 ,imagen: require('../../assets/images/limonada.png')},
@@ -26,6 +27,7 @@ export default function HomeScreen({ navigation }) {
   const [carrito, setCarrito] = useState([]);
   const [cantidades, setCantidades] = useState({});
   const [mostrarCarrito, setMostrarCarrito] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState("Todos"); // Estado para el filtro
 
   const handleCantidadChange = (nombre, cantidad) => {
     setCantidades((prev) => ({ ...prev, [nombre]: parseInt(cantidad) || 0 }));
@@ -76,73 +78,92 @@ export default function HomeScreen({ navigation }) {
     setMostrarCarrito(!mostrarCarrito);
   };
   
+  const platosFiltrados = selectedFilter === "Todos" 
+    ? menuItems 
+    : menuItems.filter((plato) => plato.tipo === selectedFilter);
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Bienvenido a su restaurante a domicilio</Text>
-        <TouchableOpacity onPress={irAlCarrito} style={styles.cartIcon}>
-          <Icon name="shopping-cart" size={30} color="#fff" />
-        </TouchableOpacity>
-      </View>
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Bienvenue dans notre RE putain restaurant</Text>
+        </View>
+
+        <TouchableOpacity onPress={irAlCarrito} style={styles.cartButton}>
+        {mostrarCarrito ? (
+          
+          <Icon name="home" size={35} color="#fff" />
+        ) : (
+          
+          <Icon name="shopping-cart" size={35} color="#fff" />
+        )}
+      </TouchableOpacity>
   
-      {mostrarCarrito ? (
-        <View style={styles.carritoContainer}>
-          <Text style={styles.carritoTitle}>Carrito de compras</Text>
-          <ScrollView>
+        {mostrarCarrito ? (
+          <View style={styles.carritoContainer}>
+            <Text style={styles.carritoTitle}>Carrito</Text>
             {carrito.length > 0 ? (
               carrito.map((item, index) => (
-                <View style={styles.carritoItem} key={index}>
-                  <Text>{item.nombre}</Text>
+                <View key={index} style={styles.carritoItem}>
+                  <Text>{item.nombre} x{item.cantidad} - ${item.precio * item.cantidad}</Text>
                   <TextInput
                     style={styles.input}
                     keyboardType="numeric"
+                    onChangeText={(value) => modificarCantidad(index, value)}
                     value={item.cantidad.toString()}
-                    onChangeText={(cantidad) => modificarCantidad(index, cantidad)}
                   />
-                  <Text> x ${item.precio.toLocaleString()} = ${item.precio * item.cantidad}</Text>
-                  <TouchableOpacity
-                    onPress={() => eliminarDelCarrito(index)}
-                    style={styles.eliminarButton}
-                  >
+                  <TouchableOpacity style={styles.eliminarButton} onPress={() => eliminarDelCarrito(index)}>
                     <Text style={styles.eliminarButtonText}>Eliminar</Text>
                   </TouchableOpacity>
                 </View>
               ))
             ) : (
-              <Text style={styles.emptyCartText}>Tu carrito está vacío.</Text>
+              <Text style={styles.emptyCartText}>El carrito está vacío.</Text>
             )}
+            <Text style={styles.totalText}>Total: ${calcularTotal().toLocaleString()} COP</Text>
+            <Text style={styles.totalText}>Domicilio: ${calcularDomicilio().toLocaleString()} COP</Text>
+            <Text style={styles.totalText}>Total con domicilio: ${calcularTotalConDomicilio().toLocaleString()} COP</Text>
+          </View>
+        ) : (
+          <>
+            {/* Filtro de tipo de plato */}
+            <TouchableOpacity style={styles.pickerContainer}>
+              <Picker
+                selectedValue={selectedFilter}
+                onValueChange={(itemValue) => setSelectedFilter(itemValue)}
+                style={styles.picker}
+              >
+                <Picker.Item label="Todos" value="Todos" />
+                {[...new Set(menuItems.map((plato) => plato.tipo))].map((tipo) => (
+                  <Picker.Item key={tipo} label={tipo} value={tipo} />
+                ))}
+              </Picker>
+            </TouchableOpacity>
   
-            <Text style={styles.totalText}>Subtotal: ${calcularTotal().toLocaleString()} COP</Text>
-            <Text style={styles.totalText}>Valor del domicilio: ${calcularDomicilio().toLocaleString()} COP</Text>
-            <Text style={styles.totalText}>Total a pagar: ${calcularTotalConDomicilio().toLocaleString()} COP</Text>
-          </ScrollView>
-        </View>
-      ) : (
-        <ScrollView style={styles.menuContainer}>
-          {menuItems.map((plato, index) => (
-            <View key={index} style={styles.menuItem}>
-              <Image source={plato.imagen} style={{ width: 100, height: 100 }} /> {/* Imagen del plato */}
-              <Text style={styles.menuItemTitle}>{plato.nombre}</Text>
-              <Text style={styles.menuItemType}>{plato.tipo}</Text>
-              <Text style={styles.menuItemDescription}>{plato.descripcion}</Text>
-              <Text style={styles.menuItemPrice}>Precio: ${plato.precio.toLocaleString()} COP</Text>
+            <ScrollView style={styles.menuContainer}>
+              {platosFiltrados.map((plato, index) => (
+                <View key={index} style={styles.menuItem}>
+                  <Image source={plato.imagen} style={{ width: 100, height: 100 }} />
+                  <Text style={styles.menuItemTitle}>{plato.nombre}</Text>
+                  <Text style={styles.menuItemType}>{plato.tipo}</Text>
+                  <Text style={styles.menuItemDescription}>{plato.descripcion}</Text>
+                  <Text style={styles.menuItemPrice}>Precio: ${plato.precio.toLocaleString()} COP</Text>
   
-              <TextInput
-                style={styles.input}
-                placeholder="Cantidad"
-                keyboardType="numeric"
-                onChangeText={(value) => handleCantidadChange(plato.nombre, value)}
-                value={cantidades[plato.nombre]?.toString() || '1'}
-              />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Cantidad"
+                    keyboardType="numeric"
+                    onChangeText={(value) => handleCantidadChange(plato.nombre, value)}
+                    value={cantidades[plato.nombre]?.toString() || '1'}
+                  />
   
-              <Button title="Añadir al carrito" onPress={() => agregarAlCarrito(plato)} />
-            </View>
-          ))}
-        </ScrollView>
-      )}
-    </View>
-  );
+                  <Button title="Añadir al carrito" onPress={() => agregarAlCarrito(plato)} />
+                </View>
+              ))}
+            </ScrollView>
+          </>
+        )}
+      </View>
+  );  
 }
 
 const styles = StyleSheet.create({
@@ -152,23 +173,73 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    paddingTop: 50,
+    paddingTop: 20,
     paddingBottom: 20,
     backgroundColor: '#ff6347',
     alignItems: 'center',
+    justifyContent: 'center', 
   },
 
   headerText: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
     color: '#fff',
+  },
+
+  cartButton: {
+    position: 'absolute',
+    bottom: 30,
+    right: 30,
+    backgroundColor: '#ff6347',
+    padding: 15,
+    borderRadius: 30,
+    elevation: 5, // Sombra para darle un aspecto flotante
+    zIndex: 10,
   },
 
   cartIcon: {
     position: 'absolute',
     right: 20,
-    top: 50,
+    bottom: 20,
+    backgroundColor: '#007BFF', // Color de fondo azul
+    borderRadius: 50, // Redondeado para darle forma circular
+    width: 70, // Aumentar el ancho
+    height: 70, // Aumentar el alto
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5, 
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
   },
+
+  homeIcon: {
+     width: 30,
+    height: 30 
+  }, // Tamaño de la imagen de la casita
+
+  carritoContainer: { 
+    padding: 20
+  },
+
+  carritoTitle: {
+     fontSize: 20, fontWeight: 'bold' 
+  },
+
+  pickerContainer: {
+    backgroundColor: '#007BFF', // Azul
+    borderRadius: 5,
+    margin: 10,
+  },
+
+  picker: {
+    backgroundColor: '#2494f4',
+    color: '#fff', 
+    fontSize: 20, 
+    height: 45,
+    fontWeight: 'bold'
+  },
+
 
   menuContainer: {
     padding: 20,
@@ -182,7 +253,7 @@ const styles = StyleSheet.create({
   },
 
   menuItemTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
   },
 
@@ -198,7 +269,7 @@ const styles = StyleSheet.create({
   },
 
   menuItemPrice: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#2e8b57',
     marginTop: 5,
@@ -212,43 +283,36 @@ const styles = StyleSheet.create({
     width: 80,
   },
 
-  carritoContainer: {
-    padding: 20,
-    borderTopWidth: 1,
-    borderColor: '#ccc',
-  },
-
-  carritoTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-
   carritoItem: {
     fontSize: 16,
     marginVertical: 5,
-    flexDirection: 'row', // Para alinear los elementos en línea horizontal
-    alignItems: 'center', // Centrar verticalmente
-    paddingVertical: 10, // Espacio vertical entre los ítems
-    borderBottomWidth: 1, // Línea divisoria
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    paddingVertical: 10, 
+    borderBottomWidth: 1, 
     borderColor: '#ccc',
   },
+
   totalText: {
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 10,
   },
+
   emptyCartText: {
     fontSize: 16,
     color: '#999',
     textAlign: 'center',
     marginTop: 20,
   },
+
   eliminarButton: {
     backgroundColor: 'red',
     padding: 3, // Reducir el tamaño del padding
     borderRadius: 5,
     marginLeft: 10,
   },
+
   eliminarButtonText: {
     color: '#fff',
     fontWeight: 'bold',
