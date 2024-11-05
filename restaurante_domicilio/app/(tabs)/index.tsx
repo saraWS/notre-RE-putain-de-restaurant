@@ -29,10 +29,14 @@ export default function HomeScreen({ navigation }) {
   const [mostrarCarrito, setMostrarCarrito] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("Todos"); // Estado para el filtro
   const [historialPedidos, setHistorialPedidos] = useState([]); // Estado para el historial de pedidos
+  const [mostrarHistorial, setMostrarHistorial] = useState(false);
+
 
   const handleCantidadChange = (nombre, cantidad) => {
     setCantidades((prev) => ({ ...prev, [nombre]: parseInt(cantidad) || 0 }));
   };
+
+  const toggleHistorial = () => setMostrarHistorial(!mostrarHistorial);
 
   const agregarAlCarrito = (plato) => {
     const cantidad = cantidades[plato.nombre] || 1;
@@ -80,14 +84,14 @@ export default function HomeScreen({ navigation }) {
       Alert.alert('Error', 'El carrito está vacío.');
       return;
     }
-    // Añadir el pedido al historial
+  
     const nuevoPedido = {
       items: [...carrito],
       total: calcularTotalConDomicilio(),
       fecha: new Date().toLocaleString()
     };
     setHistorialPedidos((prev) => [...prev, nuevoPedido]);
-    setCarrito([]); // Vaciar el carrito
+    setCarrito([]); 
     Alert.alert('Pedido confirmado', 'Tu pedido ha sido confirmado.');
   };
 
@@ -117,43 +121,52 @@ export default function HomeScreen({ navigation }) {
   
         {mostrarCarrito ? (
           <View style={styles.carritoContainer}>
-            <Text style={styles.carritoTitle}>Carrito</Text>
-            {carrito.length > 0 ? (
-              carrito.map((item, index) => (
-                <View key={index} style={styles.carritoItem}>
-                  <Text>{item.nombre} x {item.cantidad} -> ${item.precio * item.cantidad}</Text>
-                  <TextInput
-                    style={styles.input}
-                    keyboardType="numeric"
-                    onChangeText={(value) => modificarCantidad(index, value)}
-                    value={item.cantidad.toString()}
-                  />
-                  <TouchableOpacity style={styles.eliminarButton} onPress={() => eliminarDelCarrito(index)}>
-                    <Text style={styles.eliminarButtonText}>Eliminar</Text>
-                  </TouchableOpacity>
-                </View>
-              ))
-            ) : (
-              <Text style={styles.emptyCartText}>El carrito está vacío.</Text>
-            )}
-            <Text style={styles.totalText}>Total: ${calcularTotal().toLocaleString()} COP</Text>
-            <Text style={styles.totalText}>Domicilio: ${calcularDomicilio().toLocaleString()} COP</Text>
-            <Text style={styles.totalText}>Total con domicilio: ${calcularTotalConDomicilio().toLocaleString()} COP</Text>
-          <Button title="CONFIRMAR PEDIDO" onPress={confirmarPedido} /> {/* Botón de confirmar pedido */}
+              <Text style={styles.carritoTitle}>Carrito</Text>
+              {carrito.length > 0 ? (
+                carrito.map((item, index) => (
+                  <View key={index} style={styles.carritoItem}>
+                    <Text>{item.nombre} x {item.cantidad} -> ${item.precio * item.cantidad}</Text>
+                    <TextInput
+                      style={styles.input}
+                      keyboardType="numeric"
+                      onChangeText={(value) => modificarCantidad(index, value)}
+                      value={item.cantidad.toString()}
+                    />
+                    <TouchableOpacity style={styles.eliminarButton} onPress={() => eliminarDelCarrito(index)}>
+                      <Text style={styles.eliminarButtonText}>Eliminar</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))
+              ) : (
+                <Text style={styles.emptyCartText}>El carrito está vacío.</Text>
+              )}
+              <Text style={styles.totalText}>Total: ${calcularTotal().toLocaleString()} COP</Text>
+              <Text style={styles.totalText}>Domicilio: ${calcularDomicilio().toLocaleString()} COP</Text>
+              <Text style={styles.totalText}>Total con domicilio: ${calcularTotalConDomicilio().toLocaleString()} COP</Text>
+            <Button title="CONFIRMAR PEDIDO" onPress={confirmarPedido} /> {/* Botón de confirmar pedido */}
+            <Button title="VER HISTORIAL DE PEDIDOS" onPress={() => setMostrarHistorial(!mostrarHistorial)} />
 
-          {/* Historial de pedidos */}
-          <Text style={styles.historialTitle}>Historial de Pedidos</Text>
-          <ScrollView>
-            {historialPedidos.map((pedido, index) => (
-              <View key={index} style={styles.historialPedido}>
-                <Text>Pedido realizado el: {pedido.fecha}</Text>
-                <Text>Total: ${pedido.total.toLocaleString()} COP</Text>
-                {pedido.items.map((item, idx) => (
-                  <Text key={idx}>{item.nombre} x {item.cantidad}</Text>
-                ))}
-              </View>
-            ))}
-          </ScrollView>
+
+            {/* Historial de pedidos */}
+            {mostrarHistorial && (
+                <View style={styles.historialContainer}>
+                  {mostrarHistorial && (
+                    <Text style={styles.historialTitulo}>Historial de Pedidos</Text>
+                    )}
+                  <ScrollView>
+                    {historialPedidos.map((pedido, index) => (
+                      <View key={index} style={styles.pedido}>
+                        <Text style={styles.pedidoFecha}>Fecha: {pedido.fecha}</Text>
+                        <Text style={styles.pedidoTotal}>Total: ${pedido.total.toLocaleString()} COP</Text>
+                        {pedido.items.map((item, itemIndex) => (
+                          <Text key={itemIndex} style={styles.pedidoItem}>{item.nombre} x{item.cantidad}</Text>
+                        ))}
+                      </View>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+
           
           </View>
         ) : (
@@ -351,4 +364,56 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 12, // Tamaño de texto más pequeño
   },
+
+  historialContainer: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: '#f0f0f5',
+    borderRadius: 10,
+  },
+  historialTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  pedido: {
+    padding: 10,
+    marginVertical: 5,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  pedidoFecha: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#555',
+  },
+  pedidoTotal: {
+    fontSize: 14,
+    color: '#333',
+  },
+  pedidoItem: {
+    fontSize: 12,
+    color: '#666',
+  },
+
+  botonesContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',  // Esto separa los botones horizontalmente
+    marginVertical: 10,               // Ajusta según el espacio deseado
+  },
+  
+  historialTitulo: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 15,
+    textAlign: 'center',
+  },
+
+  
+  
 });
