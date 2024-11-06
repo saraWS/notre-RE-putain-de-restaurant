@@ -27,8 +27,8 @@ export default function HomeScreen({ navigation }) {
   const [carrito, setCarrito] = useState([]);
   const [cantidades, setCantidades] = useState({});
   const [mostrarCarrito, setMostrarCarrito] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState("Todos"); // Estado para el filtro
-  const [historialPedidos, setHistorialPedidos] = useState([]); // Estado para el historial de pedidos
+  const [selectedFilter, setSelectedFilter] = useState("Todos"); 
+  const [historialPedidos, setHistorialPedidos] = useState([]); 
   const [mostrarHistorial, setMostrarHistorial] = useState(false);
 
 
@@ -143,7 +143,7 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.totalText}>Total: ${calcularTotal().toLocaleString()} COP</Text>
               <Text style={styles.totalText}>Domicilio: ${calcularDomicilio().toLocaleString()} COP</Text>
               <Text style={styles.totalText}>Total con domicilio: ${calcularTotalConDomicilio().toLocaleString()} COP</Text>
-            <Button title="CONFIRMAR PEDIDO" onPress={confirmarPedido} /> {/* Botón de confirmar pedido */}
+            <Button title="CONFIRMAR PEDIDO" onPress={confirmarPedido} /> 
             <Button title="VER HISTORIAL DE PEDIDOS" onPress={() => setMostrarHistorial(!mostrarHistorial)} />
 
 
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ff6347',
     padding: 15,
     borderRadius: 30,
-    elevation: 5, // Sombra para darle un aspecto flotante
+    elevation: 5, 
     zIndex: 10,
   },
 
@@ -247,10 +247,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 20,
     bottom: 20,
-    backgroundColor: '#007BFF', // Color de fondo azul
-    borderRadius: 50, // Redondeado para darle forma circular
-    width: 70, // Aumentar el ancho
-    height: 70, // Aumentar el alto
+    backgroundColor: '#007BFF', 
+    borderRadius: 50, 
+    width: 70, 
+    height: 70, 
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 5, 
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
   homeIcon: {
      width: 30,
     height: 30 
-  }, // Tamaño de la imagen de la casita
+  }, 
 
   carritoContainer: { 
     padding: 20
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
   },
 
   pickerContainer: {
-    backgroundColor: '#007BFF', // Azul
+    backgroundColor: '#007BFF', 
     borderRadius: 5,
     margin: 10,
   },
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
 
   eliminarButton: {
     backgroundColor: 'red',
-    padding: 3, // Reducir el tamaño del padding
+    padding: 3, 
     borderRadius: 5,
     marginLeft: 10,
   },
@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
   eliminarButtonText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 12, // Tamaño de texto más pequeño
+    fontSize: 12, 
   },
 
   historialContainer: {
@@ -403,8 +403,8 @@ const styles = StyleSheet.create({
 
   botonesContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',  // Esto separa los botones horizontalmente
-    marginVertical: 10,               // Ajusta según el espacio deseado
+    justifyContent: 'space-between',  
+    marginVertical: 10,               
   },
   
   historialTitulo: {
